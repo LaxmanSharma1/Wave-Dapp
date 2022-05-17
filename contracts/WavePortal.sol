@@ -7,13 +7,52 @@ contract WavePortal {
     // state variable stored permanently on blockchain
     uint256 totalWaves;
 
-    constructor() {
-        console.log("Hello world, this is the first smart contract I've built"); 
+    uint256 private seed;
+
+    event NewWave(address indexed from, uint256 timestamp, string message);
+
+    struct Wave {
+        address waver; // The address of the user who waved.
+        string message; // The message the user sent
+        uint256 timestamp; // The timestamp when the user waved
     }
 
-    function wave() public {
+    Wave[] waves;
+    mapping(address => uint256) public lastWavedAt;
+    constructor() payable {
+        console.log("Constructor running..."); 
+        seed = (block.timestamp + block.difficulty)%100;
+    }
+
+    function wave(string memory _message) public {
+        require(
+            lastWavedAt[msg.sender] + 15 minutes < block.timestamp,
+            "Wait 15m"
+        );
+        lastWavedAt[msg.sender] = block.timestamp;
+        
         totalWaves += 1; 
-        console.log("%s has waved",msg.sender); // wallet address who is calling the wave function
+        console.log("%s waved w/ message %s",msg.sender, _message); // wallet address who is calling the wave function
+        waves.push(Wave(msg.sender, _message, block.timestamp));
+        seed = (block.difficulty + block.timestamp + seed) % 100;
+        console.log("Random which is not so random generated: %d", seed); 
+
+        if(seed <= 50) {
+            console.log("%s won!",msg.sender);
+            uint256 prizeAmount = 0.0001 ether;
+            require(
+                prizeAmount <= address(this).balance,
+                "Trying to withdraw more money than the contract has."
+            );
+            (bool success, ) = (msg.sender).call{value: prizeAmount}(""); 
+            require(success, "Failed to withdraw money from contract."); 
+        }
+        emit NewWave(msg.sender, block.timestamp, _message);
+        
+    }
+    
+    function getAllWaves() public view returns (Wave[] memory) {
+        return waves; 
     }
 
     function getTotalWaves() public view returns (uint256) {
