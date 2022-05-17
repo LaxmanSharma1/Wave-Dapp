@@ -4,11 +4,11 @@ import {useEffect,useState} from "react";
 import './App.css';
 import { EtherscanProvider } from "@ethersproject/providers";
 import abi from "./utils/WavePortal.json"
-
+// To-do : make some tweeks in ui and made it little bit better
 export default function App() {
   const [currentAccount, setCurrentAccount] = useState("");
   const [message, setMessage] = useState(""); 
-  const contractAddress = "0x91bfA4CB18ee7d6966D30D1dfFF960b5407F9458";
+  const contractAddress = "0x96b98A97a5bEDBF80953A100b9D120327E9EeE4c";
   const contractABI = abi.abi; 
   const checkIfWalletIsConnected = async () => {
     try{
